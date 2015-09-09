@@ -16,5 +16,4 @@ class Trendline.Views.Patients.IndexView extends Backbone.View
   render: =>
     @$el.html(@template(patients: @collection.toJSON() ))
     @addAll()
-
     return this

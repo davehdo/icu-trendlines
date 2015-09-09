@@ -9,8 +9,9 @@ class Trendline.Views.Patients.PatientView extends Backbone.View
   tagName: "tr"
 
   destroy: () ->
-    @model.destroy()
-    this.remove()
+    if confirm "Are you sure you want to delete?"
+      @model.destroy()
+      this.remove()
 
     return false
 

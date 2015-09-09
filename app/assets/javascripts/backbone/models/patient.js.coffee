@@ -8,7 +8,7 @@ class Trendline.Models.Patient extends Backbone.Model
     @annotations = new Trendline.Collections.AnnotationsCollection()
 
     @annotations.url = "/patients/#{ @get("id") }/annotations"
-    @annotations.reset options.annotations
+    @annotations.reset options.annotations if options
 
 class Trendline.Collections.PatientsCollection extends Backbone.Collection
   model: Trendline.Models.Patient

@@ -1,1 +1,2 @@
-json.extract! @patient, :id, :name, :uid, :active
+json.extract! @patient, :name, :uid, :active
+json.id @patient.to_param
