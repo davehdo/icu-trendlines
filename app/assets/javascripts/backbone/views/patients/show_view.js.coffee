@@ -83,20 +83,21 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
           category: "Event", 
           occurred_at: @x.invert( event.offsetX ).toISOString()
         @model.annotations.add annotation
-        #console.log "Saving"
-        # console.log annotation.get("occurred_at")
-        # annotation.save {}, 
-          # success: (m) => 
-            # console.log("Saved Annotation")
-        @displayAnnotations()
+
+        annotation.save {}, 
+          success: (m) => console.log("Saved Annotation")
+        @displayAnnotations() # refresh the annotations to display the new one
 
   displayAnnotations: =>
+    # create the container for annotations
     if @svg_annotations == undefined
       @svg_annotations = d3.select(@chartContainer).append("svg").attr("class", "annotations")
         .attr("width", @width + @margin.left + @margin.right)
         .attr("height", 100)
         .append("g")
         .attr("transform", "translate(" + @margin.left + "," + @margin.top + ")")
+    else # remove all the annotations for this refresh
+      @svg_annotations.selectAll("g").remove()
 
     console.log "Rendering annotations"
     @model.annotations.map (annotation) =>
@@ -109,7 +110,18 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
       g.append("text")
         .text( "asdf #{ annotation.get "comment"}" )
         .attr("x", 3).attr("y", 20)
-       
+
+      # when dragged, update position
+      $(g[0]).draggable
+        revert: "invalid"
+        containment: "document"
+        helper: "clone"
+        cursor: "move"
+        drag: (event, ui) =>
+          annotation.set "occurred_at": @x.invert( event.offsetX ).toISOString()
+          @displayAnnotations()
+        stop: (event, ui) =>
+          console.log "stop. should save the annotation here"
 
   render: ->
     @$el.html(@template(@model.toJSON() ))
