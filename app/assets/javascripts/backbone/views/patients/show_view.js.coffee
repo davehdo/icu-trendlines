@@ -5,6 +5,7 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
 
   initialize: =>
     @svg_annotations = undefined
+    @hovering = false
 
   addAll: =>
     # these are the shared parameters for all the charts
@@ -21,11 +22,9 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
 
     @parseDate = d3.time.format.iso.parse
 
-
     @chartContainer = @$el.find(".chart-container")[0]
+
     @addOne()
-    # @addOne()
-    # @addOne()
 
   addOne: =>
     # produces axis-generator, a function that when called will draw the axes
@@ -75,21 +74,16 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
     $(svg[0][0].parentElement).droppable
       accept: ".label",
       activeClass: "custom-state-active",
+      over: (event, ui) => @hovering = true
+      out: (event, ui) => @hovering = false
       drop: ( event, ui ) =>
-        # console.log ui.position.left
-        # console.log event.target
-        # console.log event.offsetX
-        # console.log event.offsetY
-        # console.log event.pageX
-        # console.log event.pageY
-        # console.log event.screenX
-        # console.log event.screenY
-        
+        # options: ui.position.left, event.offsetX, event.pageX, event.screenX
+
         annotation = new @model.annotations.model
           category: "Event", 
           occurred_at: @x.invert( event.offsetX ).toISOString()
         @model.annotations.add annotation
-        console.log "Saving"
+        #console.log "Saving"
         # console.log annotation.get("occurred_at")
         # annotation.save {}, 
           # success: (m) => 
@@ -127,5 +121,21 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
       containment: "document"
       helper: "clone"
       cursor: "move"
+      drag: (event, ui) => 
+        # remove prior cursor
+        @svg_annotations.selectAll("g.cursor").remove()
+
+        if @hovering
+          # produces a cursor so user knows where the annotation will drop
+          x = event.offsetX # when hovering over a droppable, offsetX tends to 
+          # return the coordinates relative to the droppable
+
+          g = @svg_annotations.append("g")
+            .attr("class", "cursor")
+            .attr("transform", "translate(#{x},0)")
+          g.append("line").attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 10)
+            .style("stroke-width", 2)
+            .style("stroke", "red")
+            .style("fill", "none")
 
     return this
