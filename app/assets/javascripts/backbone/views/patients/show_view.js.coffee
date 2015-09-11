@@ -99,7 +99,6 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
     else # remove all the annotations for this refresh
       @svg_annotations.selectAll("g").remove()
 
-    console.log "Rendering annotations"
     @model.annotations.map (annotation) =>
       g = @svg_annotations.append("g")
         .attr("transform", "translate(#{ @x( @parseDate( annotation.get "occurred_at")) },0)")
@@ -121,7 +120,8 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
           annotation.set "occurred_at": @x.invert( event.offsetX ).toISOString()
           @displayAnnotations()
         stop: (event, ui) =>
-          console.log "stop. should save the annotation here"
+          console.log annotation
+          annotation.save {}, success: -> console.log "Saved annotation after dragging"
 
   render: ->
     @$el.html(@template(@model.toJSON() ))

@@ -16,16 +16,27 @@ class AnnotationsController < ApplicationController
   # end
 
   def update
+    @annotation = @patient.annotations.find( params[:id] )
+    respond_to do |format|
+      if @annotation.update(annotation_params)
+        # format.html { redirect_to @annotation, notice: 'Annotation was successfully updated.' }
+        format.json { render :show, status: :ok, location: url_for([@patient, @annotation]) }
+      else
+        # format.html { render :edit }
+        format.json { render json: @annotation.errors, status: :unprocessable_entity }
+      end
+    end
+
   end
 
   def create
     @annotation = @patient.annotations.build( annotation_params )
     respond_to do |format|
       if @annotation.save
-        format.html { redirect_to url_for([@patient, @annotation]), notice: 'Annotation was successfully created.' }
+        # format.html { redirect_to url_for([@patient, @annotation]), notice: 'Annotation was successfully created.' }
         format.json { render :show, status: :created, location: url_for([@patient, @annotation]) }
       else
-        format.html { render :new }
+        # format.html { render :new }
         format.json { render json: @annotation.errors, status: :unprocessable_entity }
       end
     end
