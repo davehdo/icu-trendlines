@@ -76,11 +76,10 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
       activeClass: "custom-state-active",
       over: (event, ui) => @hovering = true
       out: (event, ui) => @hovering = false
-      drop: ( event, ui ) =>
+      drop: ( event, ui ) => # the dropped marker is accessible as ui.draggable
         # options: ui.position.left, event.offsetX, event.pageX, event.screenX
-
         annotation = new @model.annotations.model
-          category: "Event", 
+          category: ui.draggable.attr("category") || "Event", 
           occurred_at: @x.invert( event.offsetX ).toISOString()
         @model.annotations.add annotation
 
@@ -107,7 +106,7 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
         .style("stroke", "blue")
         .style("fill", "none")
       g.append("text")
-        .text( "asdf #{ annotation.get "comment"}" )
+        .text( "#{ annotation.get "category"}: #{ annotation.get "comment"}" )
         .attr("x", 3).attr("y", 20)
 
       # when dragged, update position
@@ -128,16 +127,20 @@ class Trendline.Views.Patients.ShowView extends Backbone.View
     @addAll()
     @displayAnnotations()
 
+    # these things are draggable markers
+    #   <span class="label label-default" category="Event">Event</span>
     @$el.find("#draggable-markers-container .label").draggable
       revert: "invalid" # when not dropped, the item will revert back to its initial position
       containment: "document"
       helper: "clone"
       cursor: "move"
-      drag: (event, ui) => 
+      drag: (event, ui) =>
+        # during dragging, we show a cursor so user knows where it will drop
+ 
         # remove prior cursor
         @svg_annotations.selectAll("g.cursor").remove()
 
-        if @hovering
+        if @hovering # hovering is a status that we create ourselves
           # produces a cursor so user knows where the annotation will drop
           x = event.offsetX # when hovering over a droppable, offsetX tends to 
           # return the coordinates relative to the droppable
